@@ -135,6 +135,13 @@
     // map() is a useful primitive iteration function that works a lot
     // like each(), but in addition to running the operation on all
     // the members, it also maintains an array of results.
+    const resultArr = []; 
+    
+    _.each(collection, (item) => { 
+      resultArr.push(iterator(item)); 
+    })
+    return resultArr; 
+  
   };
 
   /*
@@ -176,12 +183,30 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
+    if (accumulator === undefined) {
+      accumulator = collection[0];
+      collection = collection.slice(1);
+    }
+    
+    for (let i = 0; i < collection.length; i++) {
+      accumulator = iterator(accumulator, collection[i]);
+    }
+    return accumulator;
   };
 
   // Determine if the array or object contains a given value (using `===`).
   _.contains = function(collection, target) {
     // TIP: Many iteration problems can be most easily expressed in
     // terms of reduce(). Here's a freebie to demonstrate!
+    let result = false;
+    if (typeof collection === 'object' && !Array.isArray(collection)) {
+      for (let key in collection) {
+        if (collection[key] === target) {
+          return result = true;
+        } 
+      }
+    }
+    
     return _.reduce(collection, function(wasFound, item) {
       if (wasFound) {
         return true;
@@ -194,6 +219,16 @@
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
+    iterator = iterator || _.identity; 
+
+    return _.reduce(collection, (accumulator, element) => { 
+      if (iterator(element)) { 
+        return accumulator; 
+      } else { 
+        return false; 
+      }
+    }, true); 
+
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
