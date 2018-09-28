@@ -235,6 +235,10 @@
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    iterator = iterator || _.identity; 
+    return !(_.every(collection, (item) => { 
+      return !(iterator(item)); 
+    }));
   };
 
 
@@ -257,11 +261,28 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+    for (let i = 1; i < arguments.length; i++) { 
+      let src = arguments[i]; 
+
+      for ( let key in src) { 
+        obj[key] = src[key]; 
+      }
+    }
+    return obj; 
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+    for (let i = 1; i < arguments.length; i++) { 
+      let src = arguments[i]; 
+      for (let key in src) { 
+        if (!obj.hasOwnProperty(key)) { 
+          obj[key] = src[key]; 
+        }
+      }
+    }
+    return obj; 
   };
 
 
@@ -276,24 +297,35 @@
   // Return a function that can be called at most one time. Subsequent calls
   // should return the previously returned value.
   _.once = function(func) {
-    // TIP: These variables are stored in a "closure scope" (worth researching),
-    // so that they'll remain available to the newly-generated function every
-    // time it's called.
-    var alreadyCalled = false;
-    var result;
+    // // TIP: These variables are stored in a "closure scope" (worth researching),
+    // // so that they'll remain available to the newly-generated function every
+    // // time it's called.
+    // var alreadyCalled = false;
+    // var result;
 
-    // TIP: We'll return a new function that delegates to the old one, but only
-    // if it hasn't been called before.
-    return function() {
-      if (!alreadyCalled) {
-        // TIP: .apply(this, arguments) is the standard way to pass on all of the
-        // infromation from one function call to another.
-        result = func.apply(this, arguments);
-        alreadyCalled = true;
+    // // TIP: We'll return a new function that delegates to the old one, but only
+    // // if it hasn't been called before.
+    // return function() {
+    //   if (!alreadyCalled) {
+    //     // TIP: .apply(this, arguments) is the standard way to pass on all of the
+    //     // infromation from one function call to another.
+    //     result = func.apply(this, arguments);
+    //     alreadyCalled = true;
+    //   }
+    //   // The new function always returns the originally computed result.
+    //   return result;
+    // };
+
+    let isCalled = false; 
+    let result; 
+
+    return function () { 
+      if (!isCalled) { 
+        result = func.apply(this, arguments); 
+        isCalled = true; 
       }
-      // The new function always returns the originally computed result.
-      return result;
-    };
+      return result; 
+    }
   };
 
   // Memorize an expensive function's results by storing them. You may assume
@@ -305,6 +337,18 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    // Create a cache to store results 
+    const cache = {}
+
+    return function() { 
+      let key = [...arguments].join(''); 
+
+      // Check if key exists 
+      if (!cache[key]) { 
+        cache[key] = func.apply(this, arguments); 
+      } 
+      return cache[key]; 
+    }
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -314,6 +358,11 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    const args = [...arguments].slice(2);
+
+    return setTimeout(() => { 
+      return func.apply(this, args); 
+    }, wait); 
   };
 
 
@@ -328,6 +377,19 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    const copyArr = array.slice(); 
+    let length = copyArr.length; 
+
+    for (let i = length - 1; i > 0; i--) { 
+      let randomNumber = Math.floor(Math.random()*(i+1)); 
+      let switchPosition; 
+      
+      switchPosition = copyArr[randomNumber]; 
+      copyArr[randomNumber] = copyArr[i]; 
+      copyArr[i] = switchPosition; 
+    }
+
+    return copyArr; 
   };
 
 
